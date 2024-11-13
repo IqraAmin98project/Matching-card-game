@@ -47,10 +47,6 @@ public class MatchCards {
             "water"
     };
 
-    int rows = 4;
-    int columns = 5;
-    int CardWidth =  90;
-    int CardHeight = 128;
 
 
 }
