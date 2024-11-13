@@ -45,8 +45,10 @@ public class MatchCards {
             "metal",
             "psychic",
             "water"
+
     };
 
-
+    int rows = 4;
+    int columns = 5;
 
 }
