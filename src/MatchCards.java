@@ -1,12 +1,16 @@
 import javax.swing.*;
 import java.io.*;
+import java.util.ArrayList;
 
 public class MatchCards {
-    class card {
+    double currentPlayerTime = 0.0; // initialization iof time
+
+
+    class Card {
         private String cardName;
         private ImageIcon cardImageIcon;
 
-        public card(String cardName, ImageIcon cardImageIcon) {
+        public Card(String cardName, ImageIcon cardImageIcon) {
             this.cardName = cardName;
             this.cardImageIcon = cardImageIcon;
         }
@@ -15,17 +19,11 @@ public class MatchCards {
             return cardName;
         }
 
-        public void setCardName(String cardName) {
-            this.cardName = cardName;
-        }
 
         public ImageIcon getCardImageIcon() {
             return cardImageIcon;
         }
 
-        public void setCardImageIcon(ImageIcon cardImageIcon) {
-            this.cardImageIcon = cardImageIcon;
-        }
 
 
         public String toString() {
@@ -46,7 +44,23 @@ public class MatchCards {
             "psychic",
             "water"
     };
+        int rows = 4;
+        int columns = 5;
+        int cardWidth = 90;
+        int cardHeight = 128;
 
+    // GUI COMPONENT
+    ArrayList<Card> cardSet;
+    ImageIcon cardBackImageIcon;
+    int boardWidth = columns * cardHeight;
+    JFrame frame;
+    JLabel textLabel = new JLabel();
+    JLabel turnLabel = new JLabel("Turn: Player 1");
+    JPanel textPanel = new JPanel();
+    JPanel boardPanel = new JPanel();
+    JPanel restartGamePanel = new JPanel();
+    JButton restartButton = new JButton("Restart Game");
+    JLabel timerLabel = new JLabel("Time 0.0 seconds");
 
 
 }
