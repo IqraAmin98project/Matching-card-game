@@ -6,7 +6,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.awt.Color;
-import javax.swing.text.*;
 
 void displaySinglePlayerScore(JFrame frame,String currentPlayerName,double currentPlayerTime){
     JDialog scoreboardDialog = new JDialog(frame, "Scoreboard", true);
