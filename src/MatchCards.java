@@ -340,22 +340,29 @@ public class MatchCards {
     gameTimer = new Timer(10, e -> updateTime());
         gameTimer.start();
 }
- }
-private double gameTimeLimit; // Variable to store the selected time limit
+private void endGame(boolean completed) {
+    gameCompleted = completed;
+    gameTimer.stop();
+    String message;
+    if (completed && !isTimeExceeded ) {
+        String formattedTime = String.format("%.2f", elapsedTime);
+        message = "Congratulations! You completed the game in " + formattedTime + " seconds.";
+        if (isSinglePlayer) {
+            scoreboard.addScore(player1Name, elapsedTime, errorCount, true);
+            scoreboard.displaySinglePlayerScores(frame, player1Name, currentPlayerTime);
+            showScoreboard(player1Name, elapsedTime);  // Show the player on the scoreboard
 
-private void updateTime() {
-    elapsedTime += 0.01;
-    currentPlayerTime = elapsedTime;  // Update current player time
-
-    timerLabel.setText("Time: " + String.format("%.2f", elapsedTime) + " seconds");
-
-    // If the time exceeds the limit, end the game
-    if (elapsedTime >= gameTimeLimit) {
-        isTimeExceeded = true; // Time exceeded, player failed to complete in time
-        gameTimer.stop(); // Stop the game timer
-        endGame(false);  // Time's up, game over
+        }
+    } else {
+        message = "Game Over! You didn't complete the game in time.";
+        if (isSinglePlayer) {
+            if (completed) {
+                scoreboard.addScore(player1Name, elapsedTime, errorCount, true); // Add score to scoreboard
+                scoreboard.displaySinglePlayerScores(frame, player1Name, elapsedTime); // Display updated scoreboard
+            } else {
+            }
+        }
     }
-}
 
 
 
