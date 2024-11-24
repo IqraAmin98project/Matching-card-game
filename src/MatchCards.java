@@ -84,7 +84,62 @@ class Scoreboard {
             e.printStackTrace();
         }
     }
-    // Loop through scores and add to document
+    / Display single-player scores
+    public void displaySinglePlayerScores(JFrame frame, String currentPlayerName, double currentPlayerTime) {
+        JDialog scoreboardDialog = new JDialog(frame, "Scoreboard", true);
+        scoreboardDialog.setSize(400, 300);
+        scoreboardDialog.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        scoreboardDialog.setLayout(new BorderLayout());
+        scoreboardDialog.setResizable(true);
+
+        JTextPane scoreArea = new JTextPane();
+        scoreArea.setEditable(false);
+
+        // Define custom styles for highlighting and regular text
+        StyleContext context = new StyleContext();
+        StyledDocument doc = new DefaultStyledDocument(context);
+        Style regularStyle = context.addStyle("regular", null);
+        Style highlightedStyle = context.addStyle("highlighted", null);
+        StyleConstants.setForeground(highlightedStyle, Color.PINK);
+        StyleConstants.setForeground(regularStyle, Color.BLACK);
+
+        boolean isCurrentPlayerHighlighted = false;
+
+        // Add header row
+        try {
+            doc.insertString(doc.getLength(), "Player\tTime (s)\tErrors\n", regularStyle);
+        } catch (BadLocationException e) {
+            e.printStackTrace();
+        }
+
+        // Loop through scores and add to document
+        for (ScoreEntry entry : scores) {
+            if (entry.isSinglePlayer()) {
+                boolean isCurrentEntry = entry.getPlayerName().equals(currentPlayerName)
+                        && entry.getTime() == currentPlayerTime;
+
+                try {
+                    if (isCurrentEntry && !isCurrentPlayerHighlighted) {
+                        // Highlight current player's latest score
+                        doc.insertString(doc.getLength(), ">> " + entry.getPlayerName() + " <<\t", highlightedStyle);
+                        isCurrentPlayerHighlighted = true;
+                    } else {
+                        doc.insertString(doc.getLength(), entry.getPlayerName() + "\t", regularStyle);
+                    }
+                    doc.insertString(doc.getLength(), String.format("%.2f", entry.getTime()) + "\t" + entry.getErrors() + "\n", regularStyle);
+                } catch (BadLocationException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        scoreArea.setDocument(doc);
+        scoreboardDialog.add(new JScrollPane(scoreArea), BorderLayout.CENTER);
+        scoreboardDialog.setLocationRelativeTo(frame);
+        scoreboardDialog.setVisible(true);
+    }
+}
+// Loop through scores and add to document
         for (ScoreEntry entry : scores) {
         if (entry.isSinglePlayer()) {
             boolean isCurrentEntry = entry.getPlayerName().equals(currentPlayerName)
