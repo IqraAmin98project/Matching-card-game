@@ -162,5 +162,18 @@ private void loadScores() {
         System.out.println("Score file not found, starting fresh.");
     }
 }
+    private void saveScores() {
+        try (PrintWriter writer = new PrintWriter(new FileWriter(scoreFilePath))) {
+            for (ScoreEntry entry : scores) {
+                writer.println(entry.playerName + "\t" + entry.time + "\t" + entry.errors + "\t" + entry.isSinglePlayer);
+            }
+        } catch (IOException e) {
+            // Handle the exception
+            e.printStackTrace();
+        }
+    }
+}
+
+
 
 
