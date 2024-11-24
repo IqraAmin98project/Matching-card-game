@@ -56,7 +56,7 @@ class Scoreboard {
     private void sortScores() {
         Collections.sort(scores, Comparator.comparingDouble(ScoreEntry::getTime));
     }
-    / Load scores from the file
+    // Load scores from the file
     private void loadScores() {
         try (BufferedReader br = new BufferedReader(new FileReader(scoreFilePath))) {
             String line;
@@ -72,6 +72,16 @@ class Scoreboard {
             }
         } catch (IOException e) {
             System.out.println("Score file not found, starting fresh.");
+        }
+    }
+    / Save scores to the file
+    private void saveScores() {
+        try (PrintWriter writer = new PrintWriter(new FileWriter(scoreFilePath))) {
+            for (ScoreEntry entry : scores) {
+                writer.println(entry.getPlayerName() + "\t" + entry.getTime() + "\t" + entry.getErrors() + "\t" + entry.isSinglePlayer());
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
     // Loop through scores and add to document
@@ -94,12 +104,6 @@ class Scoreboard {
             }
         }
     }
-        scoreArea.setDocument(doc);
-        scoreboardDialog.add(new JScrollPane(scoreArea), BorderLayout.CENTER);
-        scoreboardDialog.setLocationRelativeTo(frame);
-        scoreboardDialog.setVisible(true);
-}
-}
 
 
 
