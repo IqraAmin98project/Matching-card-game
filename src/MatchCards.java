@@ -288,6 +288,62 @@ public class MatchCards {
         textLabel.setFont(new Font("Arial", Font.PLAIN, 20));
         textLabel.setHorizontalAlignment(JLabel.CENTER);
         textLabel.setText("Errors: " + errorCount);
+         if (isSinglePlayer) {
+        turnLabel.setVisible(false);
+    } else {
+        turnLabel.setFont(new Font("Arial", Font.PLAIN, 20));
+        turnLabel.setHorizontalAlignment(JLabel.CENTER);
+        turnLabel.setText("Turn: " + player1Name);
+    }
+
+        textPanel.setPreferredSize(new Dimension(boardWidth, 30));
+        textPanel.add(textLabel);
+        textPanel.add(timerLabel);
+        if (!isSinglePlayer) {
+        textPanel.add(turnLabel);
+    }
+        frame.add(textPanel, BorderLayout.NORTH);
+
+        timerLabel.setFont(new Font("Arial", Font.PLAIN, 20));
+        timerLabel.setHorizontalAlignment(JLabel.CENTER);
+    // Card game board setup
+    board = new ArrayList<>();
+        boardPanel.setLayout(new GridLayout(rows, columns));
+        for (int i = 0; i < cardSet.size(); i++) {
+        JButton tile = new JButton();
+        tile.setPreferredSize(new Dimension(cardWidth, cardHeight));
+        tile.setOpaque(true);
+        tile.setIcon(cardSet.get(i).cardImageIcon);
+        tile.setFocusable(false);
+        tile.addActionListener(new CardActionListener(tile, i));
+        board.add(tile);
+        boardPanel.add(tile);
+    }
+        frame.add(boardPanel);
+    // Restart game button setup
+        restartButton.setFont(new Font("Arial", Font.PLAIN, 16));
+        restartButton.setPreferredSize(new Dimension(boardWidth, 30));
+        restartButton.setFocusable(false);
+        restartButton.setEnabled(false);
+        restartButton.addActionListener(e -> restartGame());
+
+        restartGamePanel.add(restartButton);
+        frame.add(restartGamePanel, BorderLayout.SOUTH);
+
+        frame.pack();
+        frame.setVisible(true);
+
+    hideCardTimer = new Timer(1000, e -> hideCards());
+        hideCardTimer.setRepeats(false);
+        hideCardTimer.start();
+
+    gameTimer = new Timer(10, e -> updateTime());
+        gameTimer.start();
+}
+
+
+
+
 
 
 
