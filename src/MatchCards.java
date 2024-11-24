@@ -123,11 +123,11 @@ public class MatchCards {
         });
     }
 
-    private void showDifficultyScreen(){
+    private void showDifficultyScreen() {
         JFrame difficultyFrame = new JFrame("Select Difficulty");
         difficultyFrame.setResizable(false);
         difficultyFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        difficultyFrame.setSize(350,200);
+        difficultyFrame.setSize(350, 200);
         difficultyFrame.setLayout(new FlowLayout());
 
         // BUTTONS OF DIFFICULTY LEVEL
@@ -156,7 +156,6 @@ public class MatchCards {
         });
 
 
-
     }
 
     // Single-player screen with name input
@@ -182,7 +181,7 @@ public class MatchCards {
             player1Name = nameField.getText();
             isSinglePlayer = true;
             singlePlayerFrame.dispose();
-           showDifficultyScreen();
+            showDifficultyScreen();
         });
 
         // add components to frame
@@ -247,7 +246,7 @@ public class MatchCards {
 
     private void startGame(String difficulty) {
         // difficulty level based on time
-        switch (difficulty){
+        switch (difficulty) {
             case "Easy":
                 gameTimeLimit = Double.MAX_VALUE; // NO TIME LIMIT FOR EASY ONE
                 break;
@@ -261,7 +260,7 @@ public class MatchCards {
 
         // message that is shown on based on difficulty
         String message = " You have to complete the game in " + gameTimeLimit + " seconds to win.";
-        JOptionPane.showMessageDialog(null,message);
+        JOptionPane.showMessageDialog(null, message);
 
 
         setupCards();
@@ -336,14 +335,14 @@ public class MatchCards {
 
     private double gameTimeLimit;
 
-    private void updateTime(){
+    private void updateTime() {
         elapsedTime += 0.01;
         currentPlayerTime = elapsedTime;
 
-        timerLabel.setText("Time: "+String.format("%.2f" , elapsedTime) + "seconds");
+        timerLabel.setText("Time: " + String.format("%.2f", elapsedTime) + "seconds");
 
-   // if the time exceeds the limited time, terminate the game
-        if (elapsedTime >= gameTimeLimit){
+        // if the time exceeds the limited time, terminate the game
+        if (elapsedTime >= gameTimeLimit) {
             isTimeExceeded = true;  // time exceed,player failed to complete the game in time
             gameTimer.stop(); // game timer stop
             endGame(false); // time up game over
@@ -351,7 +350,7 @@ public class MatchCards {
 
     }
 
-    private void endGame(boolean completed){
+    private void endGame(boolean completed) {
         gameCompleted = completed;
         gameTimer.stop();
         String message;
@@ -363,43 +362,43 @@ public class MatchCards {
                 scoreboard.displaySinglePlayerScores(frame, player1Name, currentPlayerTime);
                 showScoreboard(player1Name, elapsedTime); // the player whose scores are going to be shown on scoreboard
             }
-        }  else {
-                message = "Game Over! You didn't complete the game in time.";
-                if (isSinglePlayer){
-                    if (completed){
-                        scoreboard.addScore(player1Name, elapsedTime, errorCount, true); //scores are added to scoreboard
-                        scoreboard.displaySinglePlayerScores(frame, player1Name, currentPlayerTime); // updated score are displayed now
+        } else {
+            message = "Game Over! You didn't complete the game in time.";
+            if (isSinglePlayer) {
+                if (completed) {
+                    scoreboard.addScore(player1Name, elapsedTime, errorCount, true); //scores are added to scoreboard
+                    scoreboard.displaySinglePlayerScores(frame, player1Name, currentPlayerTime); // updated score are displayed now
 
-                    }else {}
+                } else {
                 }
             }
+        }
 
 
-            JOptionPane.showMessageDialog(frame, message);
-            int response = JOptionPane.showOptionDialog(frame,
-                  "Would you like to play again?",
-                    "Game Over",
-                    JOptionPane.YES_NO_OPTION,
-                    JOptionPane.QUESTION_MESSAGE,
-                    null,
-                    new Object[]{"Play Again", "Exit"},
-                    JOptionPane.YES_OPTION);
+        JOptionPane.showMessageDialog(frame, message);
+        int response = JOptionPane.showOptionDialog(frame,
+                "Would you like to play again?",
+                "Game Over",
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.QUESTION_MESSAGE,
+                null,
+                new Object[]{"Play Again", "Exit"},
+                JOptionPane.YES_OPTION);
 
         if (response == 0) { // "Play Again"
             restartGame();
         } else { // "Exit"
             frame.dispose(); // Close the game window
+        }
     }
-}
-       private void showScoreboard(String playerName, double playerTime) {
-           // only add those score to scoreboard if the game was completed in time
-           if (gameCompleted) {
-               scoreboard.addScore(playerName, playerTime, errorCount, true);// true indicates game was completed successfully
-           }
 
-       }
+    private void showScoreboard(String playerName, double playerTime) {
+        // only add those score to scoreboard if the game was completed in time
+        if (gameCompleted) {
+            scoreboard.addScore(playerName, playerTime, errorCount, true);// true indicates game was completed successfully
+        }
 
-
+    }
 
 
     private void checkGameCompletion() {
