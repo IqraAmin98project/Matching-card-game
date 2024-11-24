@@ -340,29 +340,27 @@ public class MatchCards {
     gameTimer = new Timer(10, e -> updateTime());
         gameTimer.start();
 }
-private void endGame(boolean completed) {
-    gameCompleted = completed;
-    gameTimer.stop();
-    String message;
-    if (completed && !isTimeExceeded ) {
-        String formattedTime = String.format("%.2f", elapsedTime);
-        message = "Congratulations! You completed the game in " + formattedTime + " seconds.";
-        if (isSinglePlayer) {
-            scoreboard.addScore(player1Name, elapsedTime, errorCount, true);
-            scoreboard.displaySinglePlayerScores(frame, player1Name, currentPlayerTime);
-            showScoreboard(player1Name, elapsedTime);  // Show the player on the scoreboard
-
-        }
-    } else {
-        message = "Game Over! You didn't complete the game in time.";
-        if (isSinglePlayer) {
-            if (completed) {
-                scoreboard.addScore(player1Name, elapsedTime, errorCount, true); // Add score to scoreboard
-                scoreboard.displaySinglePlayerScores(frame, player1Name, elapsedTime); // Display updated scoreboard
-            } else {
-            }
-        }
+private void setupCards() {
+    cardSet = new ArrayList<>();
+    for (String cardName : cardList) {
+        Image cardImg = new ImageIcon(getClass().getResource("./img/" + cardName + ".jpg")).getImage();
+        ImageIcon cardImageIcon = new ImageIcon(cardImg.getScaledInstance(cardWidth, cardHeight, Image.SCALE_SMOOTH));
+        cardSet.add(new Card(cardName, cardImageIcon));
     }
+    cardSet.addAll(cardSet);
+
+    Image cardBackImg = new ImageIcon(getClass().getResource("./img/back.jpg")).getImage();
+    cardBackImageIcon = new ImageIcon(cardBackImg.getScaledInstance(cardWidth, cardHeight, Image.SCALE_SMOOTH));
+}
+
+private void shuffleCards() {
+    for (int i = 0; i < cardSet.size(); i++) {
+        int j = (int) (Math.random() * cardSet.size());
+        Card temp = cardSet.get(i);
+        cardSet.set(i, cardSet.get(j));
+        cardSet.set(j, temp);
+    }
+}
 
 
 
