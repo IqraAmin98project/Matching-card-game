@@ -207,6 +207,21 @@ public class MatchCards {
     int columns = 5;
     int cardWidth = 90;
     int cardHeight = 128;
+    // GUI components
+    ArrayList<Card> cardSet;
+    ImageIcon cardBackImageIcon;
+    int boardWidth = columns * cardWidth;
+    int boardHeight = rows * cardHeight;
+    JFrame frame;
+    JLabel textLabel = new JLabel();
+    JLabel turnLabel = new JLabel("Turn: Player 1");
+    JPanel textPanel = new JPanel();
+    JPanel boardPanel = new JPanel();
+    JPanel restartGamePanel = new JPanel();
+    JButton restartButton = new JButton("Restart Game");
+    JLabel timerLabel = new JLabel("Time: 0.0 seconds");
+
+
 
 
 
