@@ -56,6 +56,24 @@ class Scoreboard {
     private void sortScores() {
         Collections.sort(scores, Comparator.comparingDouble(ScoreEntry::getTime));
     }
+    / Load scores from the file
+    private void loadScores() {
+        try (BufferedReader br = new BufferedReader(new FileReader(scoreFilePath))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                String[] parts = line.split("\t");
+                if (parts.length == 4) {
+                    String playerName = parts[0];
+                    double time = Double.parseDouble(parts[1]);
+                    int errors = Integer.parseInt(parts[2]);
+                    boolean isSinglePlayer = Boolean.parseBoolean(parts[3]);
+                    scores.add(new ScoreEntry(playerName, time, errors, isSinglePlayer));
+                }
+            }
+        } catch (IOException e) {
+            System.out.println("Score file not found, starting fresh.");
+        }
+    }
 
 
 
