@@ -1,4 +1,9 @@
-ScoreEntry(String playerName, double time, int errors, boolean isSinglePlayer) {
+class ScoreEntry {
+    String playerName;
+    double time;
+    int errors;
+    boolean isSinglePlayer; // New attribute to tag single or multiplayer mode
+    ScoreEntry(String playerName, double time, int errors, boolean isSinglePlayer) {
     this.playerName = playerName;
     this.time = time;
     this.errors = errors;
@@ -74,7 +79,7 @@ class Scoreboard {
             System.out.println("Score file not found, starting fresh.");
         }
     }
-    / Save scores to the file
+    // Save scores to the file
     private void saveScores() {
         try (PrintWriter writer = new PrintWriter(new FileWriter(scoreFilePath))) {
             for (ScoreEntry entry : scores) {
@@ -84,7 +89,7 @@ class Scoreboard {
             e.printStackTrace();
         }
     }
-    / Display single-player scores
+    // Display single-player scores
     public void displaySinglePlayerScores(JFrame frame, String currentPlayerName, double currentPlayerTime) {
         JDialog scoreboardDialog = new JDialog(frame, "Scoreboard", true);
         scoreboardDialog.setSize(400, 300);
@@ -138,31 +143,24 @@ class Scoreboard {
         scoreboardDialog.setLocationRelativeTo(frame);
         scoreboardDialog.setVisible(true);
     }
-}
-// Loop through scores and add to document
-        for (ScoreEntry entry : scores) {
-        if (entry.isSinglePlayer()) {
-            boolean isCurrentEntry = entry.getPlayerName().equals(currentPlayerName)
-                    && entry.getTime() == currentPlayerTime;
+private void loadScores() {
+    try (BufferedReader br = new BufferedReader(new FileReader(scoreFilePath))) {
+        String line;
+        while ((line = br.readLine()) != null) {
+            String[] parts = line.split("\t");
+            if (parts.length == 4) {
+                String playerName = parts[0];
+                double time = Double.parseDouble(parts[1]);
+                int errors = Integer.parseInt(parts[2]); // Parse errors
+                boolean isSinglePlayer = Boolean.parseBoolean(parts[3]);
+                scores.add(new ScoreEntry(playerName, time, errors, isSinglePlayer));
 
-            try {
-                if (isCurrentEntry && !isCurrentPlayerHighlighted) {
-                    // Highlight current player's latest score
-                    doc.insertString(doc.getLength(), ">> " + entry.getPlayerName() + " <<\t", highlightedStyle);
-                    isCurrentPlayerHighlighted = true;
-                } else {
-                    doc.insertString(doc.getLength(), entry.getPlayerName() + "\t", regularStyle);
-                }
-                doc.insertString(doc.getLength(), String.format("%.2f", entry.getTime()) + "\t" + entry.getErrors() + "\n", regularStyle);
-            } catch (BadLocationException e) {
-                e.printStackTrace();
             }
         }
+    } catch (IOException e) {
+        // Handle the exception (e.g., file not found)
+        System.out.println("Score file not found, starting fresh.");
     }
-
-
-
-
-
+}
 
 
