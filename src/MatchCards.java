@@ -403,6 +403,16 @@ private void restartGame() {
     elapsedTime = 0.0;
     textLabel.setText("Errors: " + errorCount);
     timerLabel.setText("Time: 0.0 seconds");
+    if (!isSinglePlayer) {
+        currentPlayer = 1;
+        turnLabel.setText("Turn: " + player1Name);
+    }
+    hideCardTimer.start();
+    gameTimer.start();
+    boardPanel.revalidate();
+    boardPanel.repaint();
+}
+
 
 
 
