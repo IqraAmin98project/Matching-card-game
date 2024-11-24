@@ -46,6 +46,12 @@ class Scoreboard {
         scores = new ArrayList<>();
         loadScores();
     }
+    // Add score method encapsulates score insertion and sorting
+    public void addScore(String playerName, double time, int errors, boolean isSinglePlayer) {
+        scores.add(new ScoreEntry(playerName, time, errors, isSinglePlayer));
+        sortScores();
+        saveScores();
+    }
 
 
 
