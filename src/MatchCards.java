@@ -380,6 +380,29 @@ private void hideCards() {
         restartButton.setEnabled(true);
     }
 }
+private void restartGame() {
+    boardPanel.removeAll();
+    board.clear();
+    setupCards();
+    shuffleCards();
+
+    for (int i = 0; i < cardSet.size(); i++) {
+        JButton tile = new JButton();
+        tile.setPreferredSize(new Dimension(cardWidth, cardHeight));
+        tile.setOpaque(true);
+        tile.setIcon(cardSet.get(i).cardImageIcon);
+        tile.setFocusable(false);
+        tile.addActionListener(new CardActionListener(tile, i));
+        board.add(tile);
+        boardPanel.add(tile);
+    }
+
+    errorCount = 0;
+    player1Score = 0;
+    player2Score = 0;
+    elapsedTime = 0.0;
+    textLabel.setText("Errors: " + errorCount);
+    timerLabel.setText("Time: 0.0 seconds");
 
 
 
