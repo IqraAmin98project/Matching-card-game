@@ -52,6 +52,10 @@ class Scoreboard {
         sortScores();
         saveScores();
     }
+    // Sort scores in ascending order based on time
+    private void sortScores() {
+        Collections.sort(scores, Comparator.comparingDouble(ScoreEntry::getTime));
+    }
 
 
 
