@@ -220,6 +220,21 @@ public class MatchCards {
     JPanel restartGamePanel = new JPanel();
     JButton restartButton = new JButton("Restart Game");
     JLabel timerLabel = new JLabel("Time: 0.0 seconds");
+    // Game state variables
+    boolean isSinglePlayer;
+    int errorCount = 0;
+    int player1Score = 0;
+    int player2Score = 0;
+    int currentPlayer = 1;
+    ArrayList<JButton> board;
+    Timer hideCardTimer, gameTimer;
+    boolean gameReady = false;
+    JButton card1Selected, card2Selected;
+    double elapsedTime = 0.0;
+    String player1Name;
+    String player2Name;
+
+
 
 
 
