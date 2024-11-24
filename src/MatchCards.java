@@ -190,6 +190,24 @@ public class MatchCards {
             return cardName;
         }
     }
+    // Game configuration
+    String[] cardList = {
+            "darkness",
+            "double",
+            "fairy",
+            "fighting",
+            "fire",
+            "grass",
+            "lightning",
+            "metal",
+            "psychic",
+            "water"};
+
+    int rows = 4;
+    int columns = 5;
+    int cardWidth = 90;
+    int cardHeight = 128;
+
 
 
 
