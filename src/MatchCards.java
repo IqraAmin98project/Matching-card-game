@@ -94,6 +94,14 @@ class Scoreboard {
             }
         }
     }
+        scoreArea.setDocument(doc);
+        scoreboardDialog.add(new JScrollPane(scoreArea), BorderLayout.CENTER);
+        scoreboardDialog.setLocationRelativeTo(frame);
+        scoreboardDialog.setVisible(true);
+}
+}
+
+
 
 
 
