@@ -250,6 +250,32 @@ public class MatchCards {
         JButton singlePlayerButton = new JButton("Single Player");
         JButton twoPlayerButton = new JButton("Two Players");
         JButton scoreboardButton = new JButton("View Scoreboard"); // Declare and initialize the scoreboard button
+        // Add components to options frame
+        optionsFrame.add(singlePlayerButton);
+        optionsFrame.add(twoPlayerButton);
+        optionsFrame.add(scoreboardButton); // Add scoreboard button to the options frame
+        optionsFrame.setLocationRelativeTo(null);
+        optionsFrame.setVisible(true);
+
+        scoreboardButton.addActionListener(e ->
+                scoreboard.displaySinglePlayerScores(optionsFrame, player1Name, currentPlayerTime));
+
+        // Single-player selection
+        singlePlayerButton.addActionListener(e -> {
+            optionsFrame.dispose();
+            showSinglePlayerScreen();
+
+
+        });
+        // Two-player selection
+        twoPlayerButton.addActionListener(e -> {
+            optionsFrame.dispose();
+            showTwoPlayerScreen();
+        });
+
+    }
+
+
 
 
 
