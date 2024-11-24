@@ -274,6 +274,22 @@ public class MatchCards {
         });
 
     }
+    setupCards();
+    shuffleCards();
+
+    frame = new JFrame("Pokemon Match Cards - Player: " + player1Name);
+        frame.setLayout(new BorderLayout());
+        frame.setSize(boardWidth, boardHeight);
+        frame.setLocationRelativeTo(null);
+        frame.setResizable(false);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+    // Error text label and timer label
+        textLabel.setFont(new Font("Arial", Font.PLAIN, 20));
+        textLabel.setHorizontalAlignment(JLabel.CENTER);
+        textLabel.setText("Errors: " + errorCount);
+
+
 
 
 
