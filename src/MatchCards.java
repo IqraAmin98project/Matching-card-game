@@ -37,6 +37,16 @@ public void setSinglePlayer(boolean isSinglePlayer) {
     this.isSinglePlayer = isSinglePlayer;
 }
 }
+class Scoreboard {
+    private ArrayList<ScoreEntry> scores;
+    private final String scoreFilePath = "scoreboard.txt";
+
+    // Constructor to initialize scores
+    public Scoreboard() {
+        scores = new ArrayList<>();
+        loadScores();
+    }
+
 
 
 
