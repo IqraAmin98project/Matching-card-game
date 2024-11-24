@@ -412,6 +412,58 @@ private void restartGame() {
     boardPanel.revalidate();
     boardPanel.repaint();
 }
+private class CardActionListener implements ActionListener {
+    JButton tile;
+    int index;
+
+    public CardActionListener(JButton tile, int index) {
+        this.tile = tile;
+        this.index = index;
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        if (!gameReady || tile.getIcon() != cardBackImageIcon) return;
+
+        if (card1Selected == null) {
+            card1Selected = tile;
+            card1Selected.setIcon(cardSet.get(index).cardImageIcon);
+        } else if (card2Selected == null) {
+            card2Selected = tile;
+            card2Selected.setIcon(cardSet.get(index).cardImageIcon);
+
+            if (card1Selected.getIcon() == card2Selected.getIcon()) {
+                if (!isSinglePlayer) {
+                    if (currentPlayer == 1) player1Score++;
+                    else player2Score++;
+
+                }
+                card1Selected = null;
+                card2Selected = null;
+                checkGameCompletion();
+            } else {
+
+                errorCount++;
+                textLabel.setText("Errors: " + errorCount);
+
+                hideCardTimer.start();
+                hideCardTimer.start();
+            }
+        }
+    }
+}
+@FunctionalInterface
+interface SimpleDocumentListener extends javax.swing.event.DocumentListener {
+    void update();
+
+    @Override
+    default void insertUpdate(javax.swing.event.DocumentEvent e) { update(); }
+    @Override
+    default void removeUpdate(javax.swing.event.DocumentEvent e) { update(); }
+    @Override
+    default void changedUpdate(javax.swing.event.DocumentEvent e){update();}
+}}
+
 
 
 
