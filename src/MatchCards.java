@@ -74,6 +74,26 @@ class Scoreboard {
             System.out.println("Score file not found, starting fresh.");
         }
     }
+    // Loop through scores and add to document
+        for (ScoreEntry entry : scores) {
+        if (entry.isSinglePlayer()) {
+            boolean isCurrentEntry = entry.getPlayerName().equals(currentPlayerName)
+                    && entry.getTime() == currentPlayerTime;
+
+            try {
+                if (isCurrentEntry && !isCurrentPlayerHighlighted) {
+                    // Highlight current player's latest score
+                    doc.insertString(doc.getLength(), ">> " + entry.getPlayerName() + " <<\t", highlightedStyle);
+                    isCurrentPlayerHighlighted = true;
+                } else {
+                    doc.insertString(doc.getLength(), entry.getPlayerName() + "\t", regularStyle);
+                }
+                doc.insertString(doc.getLength(), String.format("%.2f", entry.getTime()) + "\t" + entry.getErrors() + "\n", regularStyle);
+            } catch (BadLocationException e) {
+                e.printStackTrace();
+            }
+        }
+    }
 
 
 
