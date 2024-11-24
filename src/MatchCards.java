@@ -340,6 +340,23 @@ public class MatchCards {
     gameTimer = new Timer(10, e -> updateTime());
         gameTimer.start();
 }
+ }
+private double gameTimeLimit; // Variable to store the selected time limit
+
+private void updateTime() {
+    elapsedTime += 0.01;
+    currentPlayerTime = elapsedTime;  // Update current player time
+
+    timerLabel.setText("Time: " + String.format("%.2f", elapsedTime) + " seconds");
+
+    // If the time exceeds the limit, end the game
+    if (elapsedTime >= gameTimeLimit) {
+        isTimeExceeded = true; // Time exceeded, player failed to complete in time
+        gameTimer.stop(); // Stop the game timer
+        endGame(false);  // Time's up, game over
+    }
+}
+
 
 
 
