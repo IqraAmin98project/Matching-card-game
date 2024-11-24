@@ -361,6 +361,25 @@ private void shuffleCards() {
         cardSet.set(j, temp);
     }
 }
+private void hideCards() {
+    if (gameReady && card1Selected != null && card2Selected != null) {
+        card1Selected.setIcon(cardBackImageIcon);
+        card1Selected = null;
+        card2Selected.setIcon(cardBackImageIcon);
+        card2Selected = null;
+
+        if (!isSinglePlayer) {
+            currentPlayer = (currentPlayer == 1) ? 2 : 1;
+            turnLabel.setText("Turn: " + (currentPlayer == 1 ? player1Name : player2Name));
+        }
+    } else {
+        for (JButton tile : board) {
+            tile.setIcon(cardBackImageIcon);
+        }
+        gameReady = true;
+        restartButton.setEnabled(true);
+    }
+}
 
 
 
