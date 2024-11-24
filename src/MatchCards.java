@@ -233,6 +233,25 @@ public class MatchCards {
     double elapsedTime = 0.0;
     String player1Name;
     String player2Name;
+    public MatchCards() {
+        scoreboard = new Scoreboard();
+
+        showOptionsMenu();
+    }
+
+    private void showOptionsMenu() {
+        JFrame optionsFrame = new JFrame("Game Menu");
+        optionsFrame.setResizable(false);
+        optionsFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        optionsFrame.setSize(350, 200);
+        optionsFrame.setLayout(new FlowLayout());
+
+        // Player option buttons
+        JButton singlePlayerButton = new JButton("Single Player");
+        JButton twoPlayerButton = new JButton("Two Players");
+        JButton scoreboardButton = new JButton("View Scoreboard"); // Declare and initialize the scoreboard button
+
+
 
 
 
