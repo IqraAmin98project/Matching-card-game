@@ -2,72 +2,7 @@ import javax.swing.*;
 import javax.swing.text.*;
 import java.awt.*;
 import java.io.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.ArrayList;
-import java.awt.Color;
-
-void displaySinglePlayerScore(JFrame frame,String currentPlayerName,double currentPlayerTime){
-    JDialog scoreboardDialog = new JDialog(frame, "Scoreboard", true);
-    scoreboardDialog.setSize(400, 300);
-    scoreboardDialog.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-    scoreboardDialog.setLayout(new BorderLayout());
-    scoreboardDialog.setResizable(true);  // Allow resizing
-
-    // Create a JTextPane with custom styles for highlighting
-    JTextPane scoreArea = new JTextPane();
-    scoreArea.setEditable(false);
-
-    // Define custom styles for highlighting and regular text
-    StyleContext context = new StyleContext();
-    StyledDocument doc = new DefaultStyledDocument(context);
-    Style regularStyle = context.addStyle("regular", null);
-    Style highlightedStyle = context.addStyle("highlighted", null);
-    StyleConstants.setForeground(highlightedStyle, Color.PINK); // Set highlighted player name color
-    StyleConstants.setForeground(regularStyle, Color.BLACK); // Set regular text color
-
-    // Flag to ensure only the current player's latest progress is highlighted once
-    boolean isCurrentPlayerHighlighted = false;
-
-// Add header row
-    try {
-        doc.insertString(doc.getLength(), "Player\tTime (s)\tErrors\n", regularStyle);
-    } catch (BadLocationException e) {
-        e.printStackTrace();
-    }
-    for (ScoreEntry entry : scores) {
-        if (entry.isSinglePlayer) {
-            boolean isCurrentEntry = entry.playerName.equals(currentPlayerName)
-                    && entry.time == currentPlayerTime;
-
-            try {
-                if (isCurrentEntry && !isCurrentPlayerHighlighted) {
-                    // Highlight only the most recent score of the current player
-                    doc.insertString(doc.getLength(), ">> " + entry.playerName + " <<\t", highlightedStyle);
-                    isCurrentPlayerHighlighted = true;
-                } else {
-                    // Regular style for other entries
-                    doc.insertString(doc.getLength(), entry.playerName + "\t", regularStyle);
-                }
-                doc.insertString(doc.getLength(), String.format("%.2f", entry.time) + "\t" + entry.errors + "\n", regularStyle);
-
-            } catch (BadLocationException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    scoreArea.setDocument(doc);
-    scoreboardDialog.add(new JScrollPane(scoreArea), BorderLayout.CENTER);
-    scoreboardDialog.setLocationRelativeTo(frame);
-    scoreboardDialog.setVisible(true);
-}
-
-
-
-
-
-
 
 
 public class MatchCards {
@@ -172,7 +107,7 @@ public class MatchCards {
         optionsFrame.setVisible(true);
 
         scoreboardButton.addActionListener(e ->
-                scoreboard.displaySinglePlayerScore(optionsFrame, playerName, currentPlayerTime));
+                scoreboard.displaySinglePlayerScore(optionsFrame, player1Name, currentPlayerTime));
 
         // single-player selection
         singlePlayerButton.addActionListener(e -> {
@@ -181,11 +116,47 @@ public class MatchCards {
 
         });
         // Two player selection
-        singlePlayerButton.addActionListener(e -> {
+        twoPlayerButton.addActionListener(e -> {
             optionsFrame.dispose();
             showTwoPlayerScreen();
 
         });
+    }
+
+    private void showDifficultyScreen(){
+        JFrame difficultyFrame = new JFrame("Select Difficulty");
+        difficultyFrame.setResizable(false);
+        difficultyFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        difficultyFrame.setSize(350,200);
+        difficultyFrame.setLayout(new FlowLayout());
+
+        // BUTTONS OF DIFFICULTY LEVEL
+        JButton easyButton = new JButton("Easy");
+        JButton mediumButton = new JButton("Medium");
+        JButton hardButton = new JButton("Hard");
+
+        // add components of difficulty frame
+        difficultyFrame.add(easyButton);
+        difficultyFrame.add(mediumButton);
+        difficultyFrame.add(hardButton);
+        difficultyFrame.setLocationRelativeTo(null);
+        difficultyFrame.setVisible(true);
+
+        easyButton.addActionListener(e -> {
+            difficultyFrame.dispose();
+            startGame("Easy");
+        });
+        mediumButton.addActionListener(e -> {
+            difficultyFrame.dispose();
+            startGame("Medium");
+        });
+        hardButton.addActionListener(e -> {
+            difficultyFrame.dispose();
+            startGame("Hard");
+        });
+
+
+
     }
 
     // Single-player screen with name input
@@ -211,7 +182,7 @@ public class MatchCards {
             player1Name = nameField.getText();
             isSinglePlayer = true;
             singlePlayerFrame.dispose();
-            startGame();
+           showDifficultyScreen();
         });
 
         // add components to frame
@@ -244,13 +215,20 @@ public class MatchCards {
         player1Field.getDocument().addDocumentListener(nameListener);
         player2Field.getDocument().addDocumentListener(nameListener);
 
+        // add difficulty selection option  (e.g.,dropdown and buttons)
+        JComboBox<String> difficultyComboBox = new JComboBox<>(new String[]{"Easy", "Medium", "Hard"});
+        difficultyComboBox.setSelectedIndex(1);
+
         // Start button action
         startButton.addActionListener(e -> {
             player1Name = player1Field.getText();
             player2Name = player2Field.getText();
             isSinglePlayer = false;
             twoPlayerFrame.dispose();
-            startGame();
+
+            // difficulty level selected start the game
+            String selectedDifficulty = (String) difficultyComboBox.getSelectedItem();
+            startGame(selectedDifficulty);
         });
 
         // Add components to frame
@@ -258,12 +236,34 @@ public class MatchCards {
         twoPlayerFrame.add(player1Field);
         twoPlayerFrame.add(player2Label);
         twoPlayerFrame.add(player2Field);
+        twoPlayerFrame.add(difficultyComboBox);
         twoPlayerFrame.add(startButton);
         twoPlayerFrame.setLocationRelativeTo(null);
         twoPlayerFrame.setVisible(true);
     }
 
-    private void startGame() {
+    private boolean gameCompleted = false;
+    private boolean isTimeExceeded = false;
+
+    private void startGame(String difficulty) {
+        // difficulty level based on time
+        switch (difficulty){
+            case "Easy":
+                gameTimeLimit = Double.MAX_VALUE; // NO TIME LIMIT FOR EASY ONE
+                break;
+            case "Medium":
+                gameTimeLimit = 50.0; // 50 seconds
+                break;
+            case "Hard":
+                gameTimeLimit = 40.0; // 40 seconds
+                break;
+        }
+
+        // message that is shown on based on difficulty
+        String message = " You have to complete the game in " + gameTimeLimit + " seconds to win.";
+        JOptionPane.showMessageDialog(null,message);
+
+
         setupCards();
         shuffleCards();
 
@@ -320,7 +320,7 @@ public class MatchCards {
         restartButton.setEnabled(false);
         restartButton.addActionListener(e -> restartGame());
 
-        restartGamePanel.add(restartGamePanel);
+        restartGamePanel.add(restartButton);
         frame.add(restartGamePanel, BorderLayout.SOUTH);
 
         frame.pack();
@@ -329,7 +329,78 @@ public class MatchCards {
         hideCardTimer = new Timer(1500, e -> hideCards());
         hideCardTimer.setRepeats(false);
         hideCardTimer.start();
+
+        gameTimer = new Timer(10, e -> updateTime());
+        gameTimer.start();
     }
+
+    private double gameTimeLimit;
+
+    private void updateTime(){
+        elapsedTime += 0.01;
+        currentPlayerTime = elapsedTime;
+
+        timerLabel.setText("Time: "+String.format("%.2f" , elapsedTime) + "seconds");
+
+   // if the time exceeds the limited time, terminate the game
+        if (elapsedTime >= gameTimeLimit){
+            isTimeExceeded = true;  // time exceed,player failed to complete the game in time
+            gameTimer.stop(); // game timer stop
+            endGame(false); // time up game over
+        }
+
+    }
+
+    private void endGame(boolean completed){
+        gameCompleted = completed;
+        gameTimer.stop();
+        String message;
+        if (completed && !isTimeExceeded) {
+            String formattedTime = String.format("%.2f", elapsedTime);
+            message = "Congratulations! You completed the game in " + formattedTime + " seconds.";
+            if (isSinglePlayer) {
+                scoreboard.addScore(player1Name, elapsedTime, errorCount, true)
+                scoreboard.displaySinglePlayerScores(frame, player1Name, currentPlayerTime);
+                showScoreboard(player1Name, elapsedTime); // the player whose scores are going to be shown on scoreboard
+            }
+        }  else {
+                message = "Game Over! You didn't complete the game in time.";
+                if (isSinglePlayer){
+                    if (completed){
+                        scoreboard.addScore(player1Name, elapsedTime, errorCount, true); //scores are added to scoreboard
+                        scoreboard.displaySinglePlayerScores(frame, player1Name, currentPlayerTime); // updated score are displayed now
+
+                    }else {}
+                }
+            }
+
+
+            JOptionPane.showMessageDialog(frame, message);
+            int response = JOptionPane.showOptionDialog(frame,
+                  "Would you like to play again?",
+                    "Game Over",
+                    JOptionPane.YES_NO_OPTION,
+                    JOptionPane.QUESTION_MESSAGE,
+                    null,
+                    new Object[]{"Play Again", "Exit"},
+                    JOptionPane.YES_OPTION);
+
+        if (response == 0) { // "Play Again"
+            restartGame();
+        } else { // "Exit"
+            frame.dispose(); // Close the game window
+    }
+}
+       private void showScoreboard(String playerName, double playerTime) {
+           // only add those score to scoreboard if the game was completed in time
+           if (gameCompleted) {
+               scoreboard.addScore(playerName, playerTime, errorCount, true);// true indicates game was completed successfully
+           }
+
+       }
+
+
+
 
     private void checkGameCompletion() {
         boolean allMatched = board.stream().allMatch(button -> button.getIcon() != cardBackImageIcon);
@@ -387,62 +458,8 @@ public class MatchCards {
         }
     }
 
-    private void updateTime() {
-        elapsedTime += 0.01;
-        currentPlayerTime = elapsedTime; // this one update the current player time
 
-        timerLabel.setText("Time: " + String.format("%.2f", elapsedTime) + " seconds");
-    }
-
-    private class CardActionListener implements ActionListener {
-        JButton tile;
-        int index;
-
-        public CardActionListener(JButton tile, int index) {
-            this.tile = tile;
-            this.index = index;
-        }
-
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            if (!gameReady || tile.getIcon() != cardBackImageIcon) return;
-
-            if (card1Selected == null) {
-                card1Selected = tile;
-                card1Selected.setIcon(cardSet.get(index).cardImageIcon);
-            } else if (card2Selected == null) {
-                card2Selected = tile;
-                card2Selected.setIcon(cardSet.get(index).cardImageIcon);
-
-                if (card1Selected.getIcon() == card1Selected.getIcon()) {
-                    if (!isSinglePlayer) {
-                        if (currentPlayer == 1) player1Score++;
-                        else player2Score++;
-                    }
-                    card1Selected = null;
-                    card2Selected = null;
-                    checkGameCompletion();
-                } else {
-                    errorCount++;
-                    textLabel.setText("Errors: " + errorCount);
-
-                    hideCardTimer.start();
-                }
-            }
-        }
-
-    }
-    @FunctionalInterface
-    interface SimpleDocumentListener extends javax.swing.event.DocumentListener {
-        void update();
-
-        @Override
-        default void insertUpdate(javax.swing.event.DocumentEvent e) { update(); }
-        @Override
-        default void removeUpdate(javax.swing.event.DocumentEvent e) { update(); }
-        @Override
-        default void changedUpdate(javax.swing.event.DocumentEvent e){update();}
-    }}
+}
 
 
 
