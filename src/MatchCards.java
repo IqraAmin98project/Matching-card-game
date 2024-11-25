@@ -173,10 +173,11 @@ public class MatchCards {
         JButton startButton = new JButton("Start Game");
         startButton.setEnabled(false);
 
-        // start button is enable when name is enter
+        // Enable Start button only when name is entered
         nameField.getDocument().addDocumentListener((SimpleDocumentListener) () ->
                 startButton.setEnabled(!nameField.getText().trim().isEmpty())
         );
+
 
         // start button action
         startButton.addActionListener(e -> {
