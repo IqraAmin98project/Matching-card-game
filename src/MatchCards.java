@@ -345,7 +345,7 @@ public class MatchCards {
             player1Name = nameField.getText();
             isSinglePlayer = true;
             singlePlayerFrame.dispose();
-           showDifficultyScreen();
+            showDifficultyScreen();
         });
 
         // add components to frame
@@ -505,7 +505,7 @@ public class MatchCards {
 
         timerLabel.setText("Time: "+String.format("%.2f" , elapsedTime) + "seconds");
 
-   // if the time exceeds the limited time, terminate the game
+        // if the time exceeds the limited time, terminate the game
         if (elapsedTime >= gameTimeLimit){
             isTimeExceeded = true;  // time exceed,player failed to complete the game in time
             gameTimer.stop(); // game timer stop
@@ -527,51 +527,51 @@ public class MatchCards {
                 showScoreboard(player1Name, elapsedTime); // the player whose scores are going to be shown on scoreboard
             }
         }  else {
-                message = "Game Over! You didn't complete the game in time.";
-                if (isSinglePlayer){
-                    if (completed){
-                        scoreboard.addScore(player1Name, elapsedTime, errorCount, true); //scores are added to scoreboard
-                        scoreboard.displaySinglePlayerScores(frame, player1Name, currentPlayerTime); // updated score are displayed now
+            message = "Game Over! You didn't complete the game in time.";
+            if (isSinglePlayer){
+                if (completed){
+                    scoreboard.addScore(player1Name, elapsedTime, errorCount, true); //scores are added to scoreboard
+                    scoreboard.displaySinglePlayerScores(frame, player1Name, currentPlayerTime); // updated score are displayed now
 
-                    }else {}
-                }
+                }else {}
             }
+        }
 
 
-            JOptionPane.showMessageDialog(frame, message);
-            int response = JOptionPane.showOptionDialog(frame,
-                  "Would you like to play again?",
-                    "Game Over",
-                    JOptionPane.YES_NO_OPTION,
-                    JOptionPane.QUESTION_MESSAGE,
-                    null,
-                    new Object[]{"Play Again", "Exit"},
-                    JOptionPane.YES_OPTION);
+        JOptionPane.showMessageDialog(frame, message);
+        int response = JOptionPane.showOptionDialog(frame,
+                "Would you like to play again?",
+                "Game Over",
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.QUESTION_MESSAGE,
+                null,
+                new Object[]{"Play Again", "Exit"},
+                JOptionPane.YES_OPTION);
 
         if (response == 0) { // "Play Again"
             restartGame();
         } else { // "Exit"
             frame.dispose(); // Close the game window
+        }
     }
-}
-       private void showScoreboard(String playerName, double playerTime) {
-           // only add those score to scoreboard if the game was completed in time
-           if (gameCompleted) {
-               scoreboard.addScore(playerName, playerTime, errorCount, true);// true indicates game was completed successfully
-           }
+    private void showScoreboard(String playerName, double playerTime) {
+        // only add those score to scoreboard if the game was completed in time
+        if (gameCompleted) {
+            scoreboard.addScore(playerName, playerTime, errorCount, true);// true indicates game was completed successfully
+        }
 
-       }
+    }
 
     private void setupCards() {
         cardSet = new ArrayList<>();
         for (String cardName : cardList) {
-            Image cardImg = new ImageIcon(getClass().getResource("./img/" + cardName + ".jpg")).getImage();
+            Image cardImg = new ImageIcon(getClass().getResource("./images/" + cardName + ".jpg")).getImage();
             ImageIcon cardImageIcon = new ImageIcon(cardImg.getScaledInstance(cardWidth, cardHeight, Image.SCALE_SMOOTH));
             cardSet.add(new Card(cardName, cardImageIcon));
         }
         cardSet.addAll(cardSet);
 
-        Image cardBackImg = new ImageIcon(getClass().getResource("./img/back.jpg")).getImage();
+        Image cardBackImg = new ImageIcon(getClass().getResource("./images/back.jpg")).getImage();
         cardBackImageIcon = new ImageIcon(cardBackImg.getScaledInstance(cardWidth, cardHeight, Image.SCALE_SMOOTH));
     }
 
@@ -752,8 +752,6 @@ public class MatchCards {
         @Override
         default void changedUpdate(javax.swing.event.DocumentEvent e){update();}
     }}
-
-
 
 
 
