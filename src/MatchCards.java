@@ -566,6 +566,8 @@ public class MatchCards {
         cardSet = new ArrayList<>();
         for (String cardName : cardList) {
             Image cardImg = new ImageIcon(getClass().getResource("./img/" + cardName + ".jpg")).getImage();
+            System.out.println(getClass().getResource("/img/" + cardName + ".jpg"));
+
             ImageIcon cardImageIcon = new ImageIcon(cardImg.getScaledInstance(cardWidth, cardHeight, Image.SCALE_SMOOTH));
             cardSet.add(new Card(cardName, cardImageIcon));
         }
