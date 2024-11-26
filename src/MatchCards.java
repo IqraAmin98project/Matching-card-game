@@ -1,6 +1,8 @@
 import.java.awt.event.ActionEvent;
 import.java.awt.event.ActionListener;
 class ScoreEntry {
+    
+    
     String playerName;
     double time;
     int errors;
