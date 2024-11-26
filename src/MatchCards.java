@@ -565,13 +565,15 @@ public class MatchCards {
     private void setupCards() {
         cardSet = new ArrayList<>();
         for (String cardName : cardList) {
-            Image cardImg = new ImageIcon(getClass().getResource("src/img" + cardName + ".jpg")).getImage();
+            Image cardImg = new ImageIcon(getClass().getResource("/img/" + cardName + ".jpg")).getImage();
+            System.out.println(getClass().getResource("/img/" + cardName + ".jpg"));
+
             ImageIcon cardImageIcon = new ImageIcon(cardImg.getScaledInstance(cardWidth, cardHeight, Image.SCALE_SMOOTH));
             cardSet.add(new Card(cardName, cardImageIcon));
         }
         cardSet.addAll(cardSet);
 
-        Image cardBackImg = new ImageIcon(getClass().getResource("src/img/back.jpg")).getImage();
+        Image cardBackImg = new ImageIcon(getClass().getResource("/img/back.jpg")).getImage();
         cardBackImageIcon = new ImageIcon(cardBackImg.getScaledInstance(cardWidth, cardHeight, Image.SCALE_SMOOTH));
 
     }
