@@ -86,7 +86,7 @@ class Scoreboard {
                     if (isCurrentEntry && !isCurrentPlayerHighlighted) {
                         // Highlight only the most recent score of the current player
 
-                        doc.insertString(doc.getLength(), ">> " + entry.getPlayerName() + " <<\t", highlightedStyle);
+                        doc.insertString(doc.getLength(),   entry.getPlayerName() + " \t", highlightedStyle);
                         isCurrentPlayerHighlighted = true;
                     } else {
                         // Regular style for other entries
@@ -246,27 +246,37 @@ public class MatchCards {
         });
     }
 
-    private void  showDifficultyScreen() {
-        // Define difficulty options
-        String[] options = {"Easy", "Medium ", "Hard"};
+    private void showDifficultyScreen() {
+        JFrame difficultyFrame = new JFrame("Select Difficulty");
+        difficultyFrame.setResizable(false);
+        difficultyFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        difficultyFrame.setSize(350, 200);
+        difficultyFrame.setLayout(new FlowLayout());
 
-        // Show the dialog with a question mark icon
-        int choice = JOptionPane.showOptionDialog(
-                null,                                // Parent component
-                "Select difficulty:",               // Message
-                "Difficulty",                       // Title
-                JOptionPane.DEFAULT_OPTION,         // Option type
-                JOptionPane.QUESTION_MESSAGE,       // Message type (adds the question mark icon)
-                null,                               // Icon (null for default icon)
-                options,                            // Options to display
-                options[0]                          // Default option
-        );
+        JButton easyButton = new JButton("Easy");
+        JButton mediumButton = new JButton("Medium");
+        JButton hardButton = new JButton("Hard");
 
-        // Handle user selection
-        if (choice != -1) { // Check if the user made a valid choice (not canceled)
-            String selectedDifficulty = options[choice];
-            startGame(selectedDifficulty); // Pass the selected difficulty to your game logic
-        }
+        difficultyFrame.add(easyButton);
+        difficultyFrame.add(mediumButton);
+        difficultyFrame.add(hardButton);
+        difficultyFrame.setLocationRelativeTo(null);
+        difficultyFrame.setVisible(true);
+
+        easyButton.addActionListener(e -> {
+            difficultyFrame.dispose();
+            startGame("Easy");
+        });
+
+        mediumButton.addActionListener(e -> {
+            difficultyFrame.dispose();
+            startGame("Medium");
+        });
+
+        hardButton.addActionListener(e -> {
+            difficultyFrame.dispose();
+            startGame("Hard");
+        });
     }
 
     // Single-player screen with name input
@@ -356,7 +366,7 @@ public class MatchCards {
         switch (difficulty) {
             case "Easy":
                 rows = 3;
-                columns = 3;
+                columns = 4;
                 gameTimeLimit = Double.MAX_VALUE;
                 break;
             case "Medium":
