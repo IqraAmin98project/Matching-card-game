@@ -1,33 +1,36 @@
 import javax.sound.sampled.*;
 import javax.swing.*;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.io.*;
 import java.awt.event.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import javax.swing.text.*;
-import java.awt.Color;
-import javax.swing.border.LineBorder;
 
 class ScoreEntry {
     private String playerName;
     private double time;
     private int errors;
     private boolean isSinglePlayer;
+    private String difficulty;
 
-    ScoreEntry(String playerName, double time, int errors, boolean isSinglePlayer) {
+    ScoreEntry(String playerName, double time, int errors, boolean isSinglePlayer, String difficulty) {
         this.playerName = playerName;
         this.time = time;
         this.errors = errors;
         this.isSinglePlayer = isSinglePlayer;
+        this.difficulty = difficulty;
     }
 
     public String getPlayerName() { return playerName; }
     public double getTime() { return time; }
     public int getErrors() { return errors; }
     public boolean isSinglePlayer() { return isSinglePlayer; }
+    public String getDifficulty() { return difficulty; }
 }
+
 
 class Scoreboard {
     private ArrayList<ScoreEntry> scores;
@@ -38,73 +41,124 @@ class Scoreboard {
         loadScores();
     }
 
-    void addScore(String playerName, double time, int errors, boolean isSinglePlayer) {
-        scores.add(new ScoreEntry(playerName, time, errors, isSinglePlayer));
-        Collections.sort(scores, Comparator.comparingDouble(s -> s.getTime()));
+    // In the Scoreboard class
+    private boolean areDoublesEqual(double a, double b) {
+        return Math.abs(a - b) < 0.01; // Adjust the precision as necessary
+    }
+
+
+    void addScore(String playerName, double time, int errors, boolean isSinglePlayer, String difficulty) {
+        scores.add(new ScoreEntry(playerName, time, errors, isSinglePlayer, difficulty));
+        Collections.sort(scores, Comparator.comparingDouble(ScoreEntry::getTime)
+                .thenComparingInt(ScoreEntry::getErrors));
         saveScores();
     }
 
-    void displaySinglePlayerScores(JFrame frame, String currentPlayerName, double currentPlayerTime) {
-        JDialog scoreboardDialog = new JDialog(frame, "Scoreboard", true);
-        scoreboardDialog.setSize(400, 300);
+
+
+    void displayScores(JFrame frame, String currentPlayerName, double currentPlayerTime) {
+        JDialog scoreboardDialog = new JDialog(frame, "SCOREBOARD", true);
+        scoreboardDialog.setSize(800, 600);
         scoreboardDialog.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        scoreboardDialog.setLayout(new BorderLayout());
-        scoreboardDialog.setResizable(true);
-
-        JTextPane scoreArea = new JTextPane();
-        scoreArea.setEditable(false);
-
-        StyleContext context = new StyleContext();
-        StyledDocument doc = new DefaultStyledDocument(context);
-        Style regularStyle = context.addStyle("regular", null);
-        Style highlightedStyle = context.addStyle("highlighted", null);
-        StyleConstants.setForeground(highlightedStyle, Color.PINK);
-        StyleConstants.setForeground(regularStyle, Color.BLACK);
-
-        boolean isCurrentPlayerHighlighted = false;
-
-        try {
-            doc.insertString(doc.getLength(), "Player\tTime (s)\tErrors\n", regularStyle);
-        } catch (BadLocationException e) {
-            e.printStackTrace();
-        }
-        for (ScoreEntry entry : scores) {
-            if (entry.isSinglePlayer()) {
-                boolean isCurrentEntry = entry.getPlayerName().equals(currentPlayerName)
-                        && entry.getTime() == currentPlayerTime;
-
-                try {
-                    if (isCurrentEntry && !isCurrentPlayerHighlighted) {
-                        doc.insertString(doc.getLength(), ">> " + entry.getPlayerName() + " <<\t", highlightedStyle);
-                        isCurrentPlayerHighlighted = true;
-                    } else {
-                        doc.insertString(doc.getLength(), entry.getPlayerName() + "\t", regularStyle);
-                    }
-                    doc.insertString(doc.getLength(), String.format("%.2f", entry.getTime()) + "\t" + entry.getErrors() + "\n", regularStyle);
-
-                } catch (BadLocationException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-
-        scoreArea.setDocument(doc);
-        scoreboardDialog.add(new JScrollPane(scoreArea), BorderLayout.CENTER);
         scoreboardDialog.setLocationRelativeTo(frame);
+
+        JPanel mainPanel = new JPanel(new BorderLayout());
+        mainPanel.setBackground(new Color(230, 230, 250)); // Light purple background
+
+        DefaultTableModel model = new DefaultTableModel(
+                new Object[]{"Player Name", "Time (s)", "Errors", "Difficulty"}, 0);
+
+        for (ScoreEntry entry : scores) {
+            model.addRow(new Object[]{
+                    entry.getPlayerName(),
+                    String.format("%.2f", entry.getTime()),
+                    entry.getErrors(),
+                    entry.getDifficulty()
+            });
+        }
+
+        JTable table = new JTable(model);
+        table.setFillsViewportHeight(true);
+        table.setBackground(new Color(230, 230, 250));
+        table.setForeground(Color.BLACK);
+        table.setSelectionBackground(new Color(180, 180, 250));
+        table.setSelectionForeground(Color.BLACK);
+        table.setFont(new Font("Arial", Font.PLAIN, 14));
+        table.getTableHeader().setFont(new Font("Arial", Font.BOLD, 14));
+        table.getTableHeader().setBackground(new Color(180, 180, 250));
+        table.getTableHeader().setForeground(Color.BLACK);
+
+        DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
+        centerRenderer.setHorizontalAlignment(JLabel.CENTER);
+        for (int i = 0; i < table.getColumnCount(); i++) {
+            table.getColumnModel().getColumn(i).setCellRenderer(centerRenderer);
+        }
+
+        // Custom renderer to highlight the current player
+        table.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
+
+            public Component getTableCellRendererComponent(JTable table, Object value,
+                                                                      boolean isSelected, boolean hasFocus,
+                                                                      int row, int column) {
+                Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+
+                // Retrieve the name and time from the current row
+                String playerName = table.getValueAt(row, 0).toString();
+                double playerTime = Double.parseDouble(table.getValueAt(row, 1).toString());
+
+                // Debugging output
+                System.out.println("Checking player: " + playerName + " with time: " + playerTime);
+                System.out.println("Current player: " + currentPlayerName + " with time: " + currentPlayerTime);
+
+                // Highlight if it matches the current player's name and time
+                if (playerName.equals(currentPlayerName) && areDoublesEqual(playerTime, currentPlayerTime)) {
+                    c.setFont(c.getFont().deriveFont(Font.BOLD));
+                    c.setForeground(new Color(0, 100, 0)); // Dark green for the current player
+                } else {
+                    c.setFont(c.getFont().deriveFont(Font.PLAIN));
+                    c.setForeground(Color.BLACK);
+                }
+                return c;
+            }
+        });
+
+        JScrollPane scrollPane = new JScrollPane(table);
+        mainPanel.add(scrollPane, BorderLayout.CENTER);
+
+        JLabel titleLabel = new JLabel("SCOREBOARD");
+        titleLabel.setFont(new Font("Arial", Font.BOLD, 24));
+        titleLabel.setForeground(new Color(75, 0, 130)); // Indigo color
+        titleLabel.setHorizontalAlignment(JLabel.CENTER);
+        mainPanel.add(titleLabel, BorderLayout.NORTH);
+
+        JButton backButton = new JButton("Back");
+        backButton.setFont(new Font("Arial", Font.BOLD, 16));
+        backButton.setForeground(Color.WHITE);
+        backButton.setBackground(new Color(75, 0, 130)); // Indigo color
+        backButton.addActionListener(e -> scoreboardDialog.dispose());
+
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        buttonPanel.setBackground(new Color(230, 230, 250));
+        buttonPanel.add(backButton);
+        mainPanel.add(buttonPanel, BorderLayout.SOUTH);
+
+        scoreboardDialog.add(mainPanel);
         scoreboardDialog.setVisible(true);
     }
+
 
     private void loadScores() {
         try (BufferedReader br = new BufferedReader(new FileReader(scoreFilePath))) {
             String line;
             while ((line = br.readLine()) != null) {
                 String[] parts = line.split("\t");
-                if (parts.length == 4) {
+                if (parts.length == 5) {
                     String playerName = parts[0];
                     double time = Double.parseDouble(parts[1]);
                     int errors = Integer.parseInt(parts[2]);
                     boolean isSinglePlayer = Boolean.parseBoolean(parts[3]);
-                    scores.add(new ScoreEntry(playerName, time, errors, isSinglePlayer));
+                    String difficulty = parts[4];
+                    scores.add(new ScoreEntry(playerName, time, errors, isSinglePlayer, difficulty));
                 }
             }
         } catch (IOException e) {
@@ -115,7 +169,9 @@ class Scoreboard {
     private void saveScores() {
         try (PrintWriter writer = new PrintWriter(new FileWriter(scoreFilePath))) {
             for (ScoreEntry entry : scores) {
-                writer.println(entry.getPlayerName() + "\t" + entry.getTime() + "\t" + entry.getErrors() + "\t" + entry.isSinglePlayer());
+                writer.println(entry.getPlayerName() + "\t" + entry.getTime() + "\t" +
+                        entry.getErrors() + "\t" + entry.isSinglePlayer() + "\t" +
+                        entry.getDifficulty());
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -125,8 +181,10 @@ class Scoreboard {
 
 public class MatchCards {
     private Scoreboard scoreboard;
-    double currentPlayerTime = 0.0;
-    private ImageIcon icon; // Declare the icon here
+    private ImageIcon icon;
+    private double currentPlayerTime = 0.0;
+    private String currentPlayerName; // Declare currentPlayerName here
+    private String difficultyLevel;
 
     class Card {
         private String cardName;
@@ -137,13 +195,21 @@ public class MatchCards {
             this.cardImageIcon = cardImageIcon;
         }
 
-        public String getCardName() { return cardName; }
-        public ImageIcon getCardImageIcon() { return cardImageIcon; }
-        public String toString() { return cardName; }
+        public String getCardName() {
+            return cardName;
+        }
+
+        public ImageIcon getCardImageIcon() {
+            return cardImageIcon;
+        }
+
+        public String toString() {
+            return cardName;
+        }
     }
-    // Add this method in the MatchCards class
+
     private void playFanfareSound() {
-        String fanfareSoundPath = "src/sounds/fanfare sound.wav"; // Update with your correct path
+        String fanfareSoundPath = "src/sounds/fanfare sound.wav";
         try {
             File soundFile = new File(fanfareSoundPath);
             AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(soundFile);
@@ -154,7 +220,6 @@ public class MatchCards {
             e.printStackTrace();
         }
     }
-
 
     String[] cardList = {
             "darkness", "double", "fairy", "fighting", "fire",
@@ -196,29 +261,27 @@ public class MatchCards {
     private boolean isTimeExceeded = false;
     private double gameTimeLimit;
 
-    private static final String BACKGROUND_IMAGE_PATH = "C:\\Users\\Ameen\\Downloads\\3386016.jpg";
+    private static final String BACKGROUND_IMAGE_PATH = "src/image-6.png";
     private static final String CLICK_SOUND_PATH = "src/sounds/click (1) sound.wav";
     private static final String APPLAUSE_SOUND_PATH = "src/sounds/applause sound.wav";
 
     public MatchCards() {
-        // Load the icon once
-        icon = new ImageIcon("C:\\Users\\Ameen\\Downloads\\3408506.png");
+        icon = new ImageIcon("src/icon image.png");
         scoreboard = new Scoreboard();
-
         showWelcomePage();
     }
 
-    private static final String WELCOME_BACKGROUND_IMAGE_PATH = "C:\\Users\\Ameen\\Downloads\\2423da50-6daf-4428-853e-2065be5ba49f.png";
+    private static final String WELCOME_BACKGROUND_IMAGE_PATH = "src/BACKGROUND IMAGE.jpg";
 
     private void showWelcomePage() {
-        playFanfareSound(); // Play fanfare sound when the welcome page is displayed
+        playFanfareSound();
         JFrame welcomeFrame = new JFrame("Welcome to Match Cards");
-        welcomeFrame.setIconImage(icon.getImage()); // Set the icon image for the welcome JFrame
+        welcomeFrame.setIconImage(icon.getImage());
         welcomeFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         welcomeFrame.setSize(800, 600);
         welcomeFrame.setLocationRelativeTo(null);
 
-        JPanel welcomePanel = createBackgroundPanel(WELCOME_BACKGROUND_IMAGE_PATH); // Use the new image path
+        JPanel welcomePanel = createBackgroundPanel(WELCOME_BACKGROUND_IMAGE_PATH);
         welcomePanel.setLayout(new BoxLayout(welcomePanel, BoxLayout.Y_AXIS));
 
         JLabel titleLabel = new JLabel("Welcome to Match Cards");
@@ -254,7 +317,7 @@ public class MatchCards {
         });
 
         scoreboardButton.addActionListener(e ->
-                scoreboard.displaySinglePlayerScores(welcomeFrame, player1Name, currentPlayerTime));
+                scoreboard.displayScores(welcomeFrame, player1Name, currentPlayerTime));
     }
 
     private JButton createStyledButton(String text, Color bgColor) {
@@ -265,7 +328,7 @@ public class MatchCards {
         button.setBackground(bgColor);
         button.setForeground(Color.WHITE);
         button.setFocusPainted(false);
-        button.setBorder(new LineBorder(Color.WHITE, 2));
+        button.setBorder(BorderFactory.createLineBorder(Color.WHITE, 2));
         button.setOpaque(true);
         return button;
     }
@@ -283,7 +346,7 @@ public class MatchCards {
 
     private void showSinglePlayerScreen() {
         JFrame singlePlayerFrame = new JFrame("Single Player - Enter Name");
-        singlePlayerFrame.setIconImage(icon.getImage()); // Set the icon image for the single player JFrame
+        singlePlayerFrame.setIconImage(icon.getImage());
         singlePlayerFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         singlePlayerFrame.setSize(600, 400);
         singlePlayerFrame.setLocationRelativeTo(null);
@@ -293,7 +356,7 @@ public class MatchCards {
 
         JLabel titleLabel = new JLabel("Enter Your Name");
         titleLabel.setFont(new Font("Arial", Font.BOLD, 28));
-        titleLabel.setForeground(Color.WHITE);
+        titleLabel.setForeground(Color.BLACK);
         titleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
 
         JTextField nameField = new JTextField(20);
@@ -315,9 +378,23 @@ public class MatchCards {
         singlePlayerFrame.add(panel);
         singlePlayerFrame.setVisible(true);
 
-        nameField.getDocument().addDocumentListener((SimpleDocumentListener) () ->
-                startButton.setEnabled(!nameField.getText().trim().isEmpty())
-        );
+        nameField.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
+            public void changedUpdate(javax.swing.event.DocumentEvent e) {
+                update();
+            }
+
+            public void removeUpdate(javax.swing.event.DocumentEvent e) {
+                update();
+            }
+
+            public void insertUpdate(javax.swing.event.DocumentEvent e) {
+                update();
+            }
+
+            public void update() {
+                startButton.setEnabled(!nameField.getText().trim().isEmpty());
+            }
+        });
 
         startButton.addActionListener(e -> {
             player1Name = nameField.getText();
@@ -329,7 +406,7 @@ public class MatchCards {
 
     private void showTwoPlayerScreen() {
         JFrame twoPlayerFrame = new JFrame("Two Players - Enter Names");
-        twoPlayerFrame.setIconImage(icon.getImage()); // Set the icon image for the two player JFrame
+        twoPlayerFrame.setIconImage(icon.getImage());
         twoPlayerFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         twoPlayerFrame.setSize(600, 500);
         twoPlayerFrame.setLocationRelativeTo(null);
@@ -339,7 +416,7 @@ public class MatchCards {
 
         JLabel titleLabel = new JLabel("Enter Player Names");
         titleLabel.setFont(new Font("Arial", Font.BOLD, 28));
-        titleLabel.setForeground(Color.WHITE);
+        titleLabel.setForeground(Color.BLACK);
         titleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
 
         JTextField player1Field = createStyledTextField("Player 1 Name");
@@ -369,9 +446,24 @@ public class MatchCards {
         twoPlayerFrame.add(panel);
         twoPlayerFrame.setVisible(true);
 
-        SimpleDocumentListener nameListener = () ->
+        javax.swing.event.DocumentListener nameListener = new javax.swing.event.DocumentListener() {
+            public void changedUpdate(javax.swing.event.DocumentEvent e) {
+                update();
+            }
+
+            public void removeUpdate(javax.swing.event.DocumentEvent e) {
+                update();
+            }
+
+            public void insertUpdate(javax.swing.event.DocumentEvent e) {
+                update();
+            }
+
+            public void update() {
                 startButton.setEnabled(!player1Field.getText().trim().isEmpty() &&
                         !player2Field.getText().trim().isEmpty());
+            }
+        };
         player1Field.getDocument().addDocumentListener(nameListener);
         player2Field.getDocument().addDocumentListener(nameListener);
 
@@ -401,6 +493,7 @@ public class MatchCards {
                     field.setForeground(Color.BLACK);
                 }
             }
+
             @Override
             public void focusLost(FocusEvent e) {
                 if (field.getText().isEmpty()) {
@@ -414,8 +507,7 @@ public class MatchCards {
 
     private void showDifficultyScreen() {
         JFrame difficultyFrame = new JFrame("Select Difficulty");
-        difficultyFrame.setIconImage(icon.getImage()); // Set the icon image for the two player JFrame
-
+        difficultyFrame.setIconImage(icon.getImage());
         difficultyFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         difficultyFrame.setSize(600, 400);
         difficultyFrame.setLocationRelativeTo(null);
@@ -460,9 +552,9 @@ public class MatchCards {
             startGame("Hard");
         });
     }
-    private String difficultyLevel; // Define globally
+
     private void startGame(String difficulty) {
-        difficultyLevel = difficulty; // Assign the passed value
+        difficultyLevel = difficulty;
         switch (difficulty) {
             case "Easy":
                 rows = 3;
@@ -481,75 +573,85 @@ public class MatchCards {
                 break;
         }
 
-        String message = "You have to complete the game in " + (gameTimeLimit == Double.MAX_VALUE ? "unlimited" : gameTimeLimit) + " seconds to win.";
-        JOptionPane.showMessageDialog(null, message);
+        String message = "Complete the game in " + (gameTimeLimit == Double.MAX_VALUE ? "unlimited" : gameTimeLimit) + " seconds.";
+        JOptionPane.showMessageDialog(frame, message, "Game Instructions", JOptionPane.INFORMATION_MESSAGE);
         playFanfareSound();
         setupCards();
         shuffleCards();
 
-        // Create the JFrame for the game first
         frame = new JFrame("Pokemon Match Cards - Player: " + player1Name);
-        frame.setIconImage (icon.getImage()); // Set the icon image for the game JFrame
-        frame.setLayout(new BorderLayout());
-        frame.setSize(boardWidth + 200, boardHeight + 100);
-        frame.setLocationRelativeTo(null);
-        frame.setResizable(false);
+        frame.setIconImage(icon.getImage());
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setSize(1024, 768);
+        frame.setLocationRelativeTo(null);
+        frame.setResizable(true);
 
-        JPanel mainPanel = createBackgroundPanel(BACKGROUND_IMAGE_PATH);
+        JPanel mainPanel = new JPanel() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                ImageIcon backgroundImage = new ImageIcon(BACKGROUND_IMAGE_PATH);
+                g.drawImage(backgroundImage.getImage(), 0, 0, getWidth(), getHeight(), this);
+            }
+        };
         mainPanel.setLayout(new BorderLayout());
 
-        textLabel.setFont(new Font("Arial", Font.PLAIN, 20));
-        textLabel.setHorizontalAlignment(JLabel.CENTER);
+        JPanel centerWrapper = new JPanel(new GridBagLayout());
+        centerWrapper.setOpaque(false);
+
+        boardPanel = new JPanel(new GridLayout(rows, columns, 10, 10));
+        boardPanel.setOpaque(false);
+
+        JPanel infoPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 5));
+        infoPanel.setOpaque(false);
+
+        textLabel.setFont(new Font("Arial", Font.BOLD, 20));
+        textLabel.setForeground(Color.WHITE);
         textLabel.setText("Errors: " + errorCount);
 
-        if (isSinglePlayer) {
-            turnLabel.setVisible(false);
-        } else {
-            turnLabel.setFont(new Font("Arial", Font.PLAIN, 20));
-            turnLabel.setHorizontalAlignment(JLabel.CENTER);
-            turnLabel.setText("Turn: " + player1Name);
-        }
+        timerLabel.setFont(new Font("Arial", Font.BOLD, 20));
+        timerLabel.setForeground(Color.WHITE);
 
-        textPanel.setPreferredSize(new Dimension(boardWidth, 30));
-        textPanel.add(textLabel);
-        textPanel.add(timerLabel);
         if (!isSinglePlayer) {
-            textPanel.add(turnLabel);
+            turnLabel.setFont(new Font("Arial", Font.BOLD, 20));
+            turnLabel.setForeground(Color.WHITE);
+            turnLabel.setText("Turn: " + player1Name);
+            infoPanel.add(turnLabel);
         }
-        mainPanel.add(textPanel, BorderLayout.NORTH);
 
-        timerLabel.setFont(new Font("Arial", Font.PLAIN, 20));
-        timerLabel.setHorizontalAlignment(JLabel.CENTER);
+        infoPanel.add(textLabel);
+        infoPanel.add(timerLabel);
 
         board = new ArrayList<>();
-        boardPanel.setLayout(new GridLayout(rows, columns));
         for (int i = 0; i < cardSet.size(); i++) {
             JButton tile = new JButton();
             tile.setPreferredSize(new Dimension(cardWidth, cardHeight));
-            tile.setOpaque(true);
             tile.setIcon(cardSet.get(i).cardImageIcon);
             tile.setFocusable(false);
+            tile.setBorder(BorderFactory.createLineBorder(Color.BLACK, 2));
             tile.addActionListener(new CardActionListener(tile, i));
             board.add(tile);
             boardPanel.add(tile);
         }
-        mainPanel.add(boardPanel, BorderLayout.CENTER);
 
-        restartButton.setFont(new Font("Arial", Font.PLAIN, 16));
-        restartButton.setPreferredSize(new Dimension(boardWidth, 30));
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        buttonPanel.setOpaque(false);
+        restartButton.setFont(new Font("Arial", Font.BOLD, 16));
         restartButton.setFocusable(false);
         restartButton.setEnabled(false);
         restartButton.addActionListener(e -> restartGame());
+        buttonPanel.add(restartButton);
 
-        restartGamePanel.add(restartButton);
-        mainPanel.add(restartGamePanel, BorderLayout.SOUTH);
+        centerWrapper.add(boardPanel);
+
+        mainPanel.add(infoPanel, BorderLayout.NORTH);
+        mainPanel.add(centerWrapper, BorderLayout.CENTER);
+        mainPanel.add(buttonPanel, BorderLayout.SOUTH);
 
         frame.add(mainPanel);
-        frame.pack();
         frame.setVisible(true);
 
-        hideCardTimer = new Timer(2000, e -> hideCards());
+        hideCardTimer = new Timer(1500, e -> hideCards());
         hideCardTimer.setRepeats(false);
         hideCardTimer.start();
 
@@ -570,54 +672,54 @@ public class MatchCards {
         }
     }
 
-    private void endGame(boolean completed) {
-        gameCompleted = completed;
-        gameTimer.stop(); // Stop the game timer
+    private void endGame(boolean successfulCompletion) {
+        gameCompleted = successfulCompletion; // This indicates if the game was completed successfully
+        gameTimer.stop(); // Stop the timer
         String message;
 
-        // Check if the game is completed
-        if (completed) {
+        // Check if the game was completed successfully
+        if (successfulCompletion) {
             String formattedTime = String.format("%.2f", elapsedTime);
 
-            // Different behavior based on difficulty level
-            if (difficultyLevel.equals("Easy") || (!isTimeExceeded && difficultyLevel.equals("Medium") || difficultyLevel.equals("Hard"))) {
-                // For Easy mode or completed within time limit for Medium/Hard
+            // Set current player name and time for scoreboard
+            currentPlayerName = player1Name; // Assuming single player for now
+            currentPlayerTime = elapsedTime;
+
+            // Check if the game was completed in time
+            if (difficultyLevel.equals("Easy") || (!isTimeExceeded && (difficultyLevel.equals("Medium") || difficultyLevel.equals("Hard")))) {
                 message = "Congratulations! You completed the game in " + formattedTime + " seconds.";
 
-                // Add score to the scoreboard for single player
                 if (isSinglePlayer) {
-                    scoreboard.addScore(player1Name, elapsedTime, errorCount, true);
-                    scoreboard.displaySinglePlayerScores(frame, player1Name, elapsedTime);
-                    showScoreboard(player1Name, elapsedTime);
+                    scoreboard.addScore(player1Name, elapsedTime, errorCount, true, difficultyLevel);
+                    scoreboard.displayScores(frame, currentPlayerName, currentPlayerTime);
                 }
 
-                // Play applause sound for successful completion
                 playSound(APPLAUSE_SOUND_PATH);
             } else {
-                // Time exceeded for Medium/Hard levels
                 message = "Game Over! You didn't complete the game in time.";
+                successfulCompletion = false; // Set to false if time exceeded
             }
         } else {
-            // Game not completed
             message = "Game Over! You didn't complete the game.";
         }
 
-        JOptionPane.showMessageDialog(frame, message);
-        showGameResult();
-
-        frame.dispose(); // Close the game window
+        showGameResult(successfulCompletion); // Pass the completion status to the result display method
+        frame.dispose();
     }
 
-
-    private void showGameResult() {
+    private void showGameResult(boolean successfulCompletion) {
         JFrame resultFrame = new JFrame("Game Result");
-        resultFrame.setIconImage(icon.getImage()); // Set the icon image for the two player JFrame
-
+        resultFrame.setIconImage(icon.getImage());
         resultFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         resultFrame.setSize(800, 600);
         resultFrame.setLocationRelativeTo(null);
 
-        JPanel resultPanel = createBackgroundPanel("C:\\Users\\Ameen\\Downloads\\success.png");
+        JPanel resultPanel;
+        if (successfulCompletion) {
+            resultPanel = createBackgroundPanel("src/success.png"); // Success image
+        } else {
+            resultPanel = createBackgroundPanel("src/game_over.png"); // Game over image
+        }
         resultPanel.setLayout(new BoxLayout(resultPanel, BoxLayout.Y_AXIS));
 
         JLabel winnerLabel = new JLabel(getWinnerMessage());
@@ -626,7 +728,7 @@ public class MatchCards {
         winnerLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
 
         JLabel scoreLabel = new JLabel(getScoreMessage());
-        scoreLabel.setFont(new Font("Arial", Font.PLAIN, 20 ));
+        scoreLabel.setFont(new Font("Arial", Font.PLAIN, 20));
         scoreLabel.setForeground(Color.WHITE);
         scoreLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
 
@@ -648,8 +750,8 @@ public class MatchCards {
 
         playAgainButton.addActionListener(e -> {
             resultFrame.dispose();
+            showWelcomePage();
             frame.dispose();
-            restartGame();
         });
 
         exitButton.addActionListener(e -> {
@@ -657,13 +759,11 @@ public class MatchCards {
             frame.dispose();
             System.exit(0);
         });
-
-
     }
 
     private String getWinnerMessage() {
         if (isSinglePlayer) {
-            return gameCompleted ? player1Name + " would you like to play again or exit!" : "Game Over!";
+            return gameCompleted ? player1Name + ", would you like to play again or exit?" : "Game Over!";
         } else {
             if (player1Score > player2Score) {
                 return player1Name + " Wins!";
@@ -680,12 +780,6 @@ public class MatchCards {
             return "Time: " + String.format("%.2f", elapsedTime) + " seconds, Errors: " + errorCount;
         } else {
             return player1Name + ": " + player1Score + " | " + player2Name + ": " + player2Score;
-        }
-    }
-
-    private void showScoreboard(String playerName, double playerTime) {
-        if (gameCompleted) {
-            scoreboard.addScore(playerName, playerTime, errorCount, true);
         }
     }
 
@@ -723,6 +817,7 @@ public class MatchCards {
             if (!isSinglePlayer) {
                 currentPlayer = (currentPlayer == 1) ? 2 : 1;
                 turnLabel.setText("Turn: " + (currentPlayer == 1 ? player1Name : player2Name));
+                turnLabel.setForeground(currentPlayer == 1 ? Color.YELLOW : Color.CYAN);
             }
         } else {
             for (JButton tile : board) {
@@ -743,7 +838,6 @@ public class MatchCards {
     }
 
     private void restartGame() {
-        // Reset game state
         errorCount = 0;
         player1Score = 0;
         player2Score = 0;
@@ -751,15 +845,12 @@ public class MatchCards {
         textLabel.setText("Errors: " + errorCount);
         timerLabel.setText("Time: 0.0 seconds");
 
-        // Clear the board
         boardPanel.removeAll();
         board.clear();
 
-        // Setup and shuffle cards
         setupCards();
         shuffleCards();
 
-        // Re-add buttons to the board
         for (int i = 0; i < cardSet.size(); i++) {
             JButton tile = new JButton();
             tile.setPreferredSize(new Dimension(cardWidth, cardHeight));
@@ -771,20 +862,17 @@ public class MatchCards {
             boardPanel.add(tile);
         }
 
-        // Reset the game state
         card1Selected = null;
         card2Selected = null;
         gameReady = false;
         restartButton.setEnabled(false);
 
-        // Revalidate and repaint the board
         boardPanel.revalidate();
         boardPanel.repaint();
 
-        // Restart timers
         hideCardTimer.start();
-        elapsedTime = 0.0; // Reset elapsed time
-        gameTimer.restart(); // Restart the game timer
+        elapsedTime = 0.0;
+        gameTimer.restart();
     }
 
     private class CardActionListener implements ActionListener {
@@ -800,7 +888,6 @@ public class MatchCards {
         public void actionPerformed(ActionEvent e) {
             if (!gameReady || tile.getIcon() != cardBackImageIcon) return;
 
-            // Play click sound
             playSound(CLICK_SOUND_PATH);
 
             if (card1Selected == null) {
@@ -837,18 +924,6 @@ public class MatchCards {
         } catch (Exception e) {
             e.printStackTrace();
         }
-    }
-
-    @FunctionalInterface
-    interface SimpleDocumentListener extends javax.swing.event.DocumentListener {
-        void update();
-
-        @Override
-        default void insertUpdate(javax.swing.event.DocumentEvent e) { update(); }
-        @Override
-        default void removeUpdate(javax.swing.event.DocumentEvent e) { update(); }
-        @Override
-        default void changedUpdate(javax.swing.event.DocumentEvent e) { update(); }
     }
 
 }
