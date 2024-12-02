@@ -31,7 +31,6 @@ class ScoreEntry {
     public String getDifficulty() { return difficulty; }
 }
 
-
 class Scoreboard {
     private ArrayList<ScoreEntry> scores;
     private final String scoreFilePath = "scoreboard.txt";
@@ -41,11 +40,9 @@ class Scoreboard {
         loadScores();
     }
 
-    // In the Scoreboard class
     private boolean areDoublesEqual(double a, double b) {
         return Math.abs(a - b) < 0.01; // Adjust the precision as necessary
     }
-
 
     void addScore(String playerName, double time, int errors, boolean isSinglePlayer, String difficulty) {
         scores.add(new ScoreEntry(playerName, time, errors, isSinglePlayer, difficulty));
@@ -53,8 +50,6 @@ class Scoreboard {
                 .thenComparingInt(ScoreEntry::getErrors));
         saveScores();
     }
-
-
 
     void displayScores(JFrame frame, String currentPlayerName, double currentPlayerTime) {
         JDialog scoreboardDialog = new JDialog(frame, "SCOREBOARD", true);
@@ -96,24 +91,16 @@ class Scoreboard {
 
         // Custom renderer to highlight the current player
         table.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
-
+            @Override
             public Component getTableCellRendererComponent(JTable table, Object value,
-                                                                      boolean isSelected, boolean hasFocus,
-                                                                      int row, int column) {
+                                                           boolean isSelected, boolean hasFocus,
+                                                           int row, int column) {
                 Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-
-                // Retrieve the name and time from the current row
                 String playerName = table.getValueAt(row, 0).toString();
-                double playerTime = Double.parseDouble(table.getValueAt(row, 1).toString());
 
-                // Debugging output
-                System.out.println("Checking player: " + playerName + " with time: " + playerTime);
-                System.out.println("Current player: " + currentPlayerName + " with time: " + currentPlayerTime);
-
-                // Highlight if it matches the current player's name and time
-                if (playerName.equals(currentPlayerName) && areDoublesEqual(playerTime, currentPlayerTime)) {
+                if (playerName.equals(currentPlayerName)) {
                     c.setFont(c.getFont().deriveFont(Font.BOLD));
-                    c.setForeground(new Color(0, 100, 0)); // Dark green for the current player
+                    c.setForeground(Color.RED); // Highlight color for current player
                 } else {
                     c.setFont(c.getFont().deriveFont(Font.PLAIN));
                     c.setForeground(Color.BLACK);
@@ -145,8 +132,6 @@ class Scoreboard {
         scoreboardDialog.add(mainPanel);
         scoreboardDialog.setVisible(true);
     }
-
-
     private void loadScores() {
         try (BufferedReader br = new BufferedReader(new FileReader(scoreFilePath))) {
             String line;
@@ -183,7 +168,7 @@ public class MatchCards {
     private Scoreboard scoreboard;
     private ImageIcon icon;
     private double currentPlayerTime = 0.0;
-    private String currentPlayerName; // Declare currentPlayerName here
+    private String currentPlayerName;
     private String difficultyLevel;
 
     class Card {
@@ -271,7 +256,7 @@ public class MatchCards {
         showWelcomePage();
     }
 
-    private static final String WELCOME_BACKGROUND_IMAGE_PATH = "src/BACKGROUND IMAGE.jpg";
+    private static final String WELCOME_BACKGROUND_IMAGE_PATH = "src/background.jpg";
 
     private void showWelcomePage() {
         playFanfareSound();
@@ -284,9 +269,9 @@ public class MatchCards {
         JPanel welcomePanel = createBackgroundPanel(WELCOME_BACKGROUND_IMAGE_PATH);
         welcomePanel.setLayout(new BoxLayout(welcomePanel, BoxLayout.Y_AXIS));
 
-        JLabel titleLabel = new JLabel("Welcome to Match Cards");
+        JLabel titleLabel = new JLabel(" ");
         titleLabel.setFont(new Font("Arial", Font.BOLD, 36));
-        titleLabel.setForeground(Color.WHITE);
+        titleLabel.setForeground(Color.BLACK);
         titleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
 
         JButton singlePlayerButton = createStyledButton("Single Player", new Color(0, 123, 255));
@@ -317,7 +302,7 @@ public class MatchCards {
         });
 
         scoreboardButton.addActionListener(e ->
-                scoreboard.displayScores(welcomeFrame, player1Name, currentPlayerTime));
+                scoreboard.displayScores(welcomeFrame, currentPlayerName, currentPlayerTime));
     }
 
     private JButton createStyledButton(String text, Color bgColor) {
@@ -558,7 +543,7 @@ public class MatchCards {
         switch (difficulty) {
             case "Easy":
                 rows = 3;
-                columns = 3;
+                columns = 4;
                 gameTimeLimit = Double.MAX_VALUE;
                 break;
             case "Medium":
@@ -673,19 +658,16 @@ public class MatchCards {
     }
 
     private void endGame(boolean successfulCompletion) {
-        gameCompleted = successfulCompletion; // This indicates if the game was completed successfully
-        gameTimer.stop(); // Stop the timer
+        gameCompleted = successfulCompletion;
+        gameTimer.stop();
         String message;
 
-        // Check if the game was completed successfully
         if (successfulCompletion) {
             String formattedTime = String.format("%.2f", elapsedTime);
 
-            // Set current player name and time for scoreboard
-            currentPlayerName = player1Name; // Assuming single player for now
+            currentPlayerName = player1Name;
             currentPlayerTime = elapsedTime;
 
-            // Check if the game was completed in time
             if (difficultyLevel.equals("Easy") || (!isTimeExceeded && (difficultyLevel.equals("Medium") || difficultyLevel.equals("Hard")))) {
                 message = "Congratulations! You completed the game in " + formattedTime + " seconds.";
 
@@ -697,13 +679,13 @@ public class MatchCards {
                 playSound(APPLAUSE_SOUND_PATH);
             } else {
                 message = "Game Over! You didn't complete the game in time.";
-                successfulCompletion = false; // Set to false if time exceeded
+                successfulCompletion = false;
             }
         } else {
             message = "Game Over! You didn't complete the game.";
         }
 
-        showGameResult(successfulCompletion); // Pass the completion status to the result display method
+        showGameResult(successfulCompletion);
         frame.dispose();
     }
 
@@ -716,9 +698,9 @@ public class MatchCards {
 
         JPanel resultPanel;
         if (successfulCompletion) {
-            resultPanel = createBackgroundPanel("src/success.png"); // Success image
+            resultPanel = createBackgroundPanel("src/success.png");
         } else {
-            resultPanel = createBackgroundPanel("src/game_over.png"); // Game over image
+            resultPanel = createBackgroundPanel("src/game_over.png");
         }
         resultPanel.setLayout(new BoxLayout(resultPanel, BoxLayout.Y_AXIS));
 
