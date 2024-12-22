@@ -60,8 +60,13 @@ class Scoreboard {
         JPanel mainPanel = new JPanel(new BorderLayout());
         mainPanel.setBackground(new Color(230, 230, 250)); // Light purple background
 
-        DefaultTableModel model = new DefaultTableModel(
-                new Object[]{"Player Name", "Time (s)", "Errors", "Difficulty"}, 0);
+        // Create a custom model to prevent editing
+        DefaultTableModel model = new DefaultTableModel(new Object[]{"Player Name", "Time (s)", "Errors", "Difficulty"}, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false; // Make all cells non-editable
+            }
+        };
 
         for (ScoreEntry entry : scores) {
             model.addRow(new Object[]{
@@ -92,15 +97,14 @@ class Scoreboard {
         // Custom renderer to highlight the current player
         table.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
             @Override
-            public Component getTableCellRendererComponent(JTable table, Object value,
-                                                           boolean isSelected, boolean hasFocus,
-                                                           int row, int column) {
+            public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
                 Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
                 String playerName = table.getValueAt(row, 0).toString();
+                double playerTime = Double.parseDouble(table.getValueAt(row, 1).toString());
 
-                if (playerName.equals(currentPlayerName)) {
+                if (playerName.equals(currentPlayerName) && areDoublesEqual(playerTime, currentPlayerTime)) {
                     c.setFont(c.getFont().deriveFont(Font.BOLD));
-                    c.setForeground(Color.RED); // Highlight color for current player
+                    c.setForeground(new Color(0, 100, 0)); // Dark green for the current player
                 } else {
                     c.setFont(c.getFont().deriveFont(Font.PLAIN));
                     c.setForeground(Color.BLACK);
@@ -171,6 +175,8 @@ public class MatchCards {
     private String currentPlayerName;
     private String difficultyLevel;
 
+
+
     class Card {
         private String cardName;
         private ImageIcon cardImageIcon;
@@ -211,21 +217,17 @@ public class MatchCards {
             "grass", "lightning", "metal", "psychic", "water"
     };
 
-    int rows = 4;
-    int columns = 5;
+    int rows = 3;
+    int columns = 4;
     int cardWidth = 90;
     int cardHeight = 128;
 
     ArrayList<Card> cardSet;
     ImageIcon cardBackImageIcon;
-    int boardWidth = columns * cardWidth;
-    int boardHeight = rows * cardHeight;
     JFrame frame;
     JLabel textLabel = new JLabel();
     JLabel turnLabel = new JLabel("Turn: Player 1");
-    JPanel textPanel = new JPanel();
     JPanel boardPanel = new JPanel();
-    JPanel restartGamePanel = new JPanel();
     JButton restartButton = new JButton("Restart Game");
     JLabel timerLabel = new JLabel("Time: 0.0 seconds");
 
