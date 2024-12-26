@@ -248,17 +248,17 @@ public class MatchCards {
     private boolean isTimeExceeded = false;
     private double gameTimeLimit;
 
-    private static final String BACKGROUND_IMAGE_PATH = "src/image-6.png";
+    private static final String BACKGROUND_IMAGE_PATH = "src/resources/image-6.png";
     private static final String CLICK_SOUND_PATH = "src/sounds/click (1) sound.wav";
     private static final String APPLAUSE_SOUND_PATH = "src/sounds/applause sound.wav";
 
     public MatchCards() {
-        icon = new ImageIcon("src/icon image.png");
+        icon = new ImageIcon("src/resources/icon image.png");
         scoreboard = new Scoreboard();
         showWelcomePage();
     }
 
-    private static final String WELCOME_BACKGROUND_IMAGE_PATH = "src/background.jpg";
+    private static final String WELCOME_BACKGROUND_IMAGE_PATH = "src/resources/background.jpg";
 
     private void showWelcomePage() {
         playFanfareSound();
@@ -700,9 +700,9 @@ public class MatchCards {
 
         JPanel resultPanel;
         if (successfulCompletion) {
-            resultPanel = createBackgroundPanel("src/success.png");
+            resultPanel = createBackgroundPanel("src/resources/success.png");
         } else {
-            resultPanel = createBackgroundPanel("src/game_over.png");
+            resultPanel = createBackgroundPanel("src/resources/game_over.png");
         }
         resultPanel.setLayout(new BoxLayout(resultPanel, BoxLayout.Y_AXIS));
 
